@@ -16,11 +16,16 @@ int main(){
     int PC = 0;
     vector<array<int, 8>> IR;
 
-    int n; cin >> n;
-    IR.resize(n);
-
-    for (int i = 0; i < n; i++){
-        string s; cin >> s;
+    int numInstrucoes; cin >> numInstrucoes;
+    IR.resize(numInstrucoes);
+    
+    // As instruções virão de um arquivo
+    fstream Entrada("programa_etapa1.txt");
+    fstream Saida("saida_etapa1.txt");
+    
+    for (int i = 0; i < numInstrucoes; i++){
+        // Para cada instrução (linha), colocará-a numa string
+        string s; Entrada >> s;
         for (int j = 0; j < 8; j++){
             IR[i][j] = (s[j] - '0');
         }
