@@ -41,7 +41,7 @@ int main(){
         int A = IR[PC][6]; // tem?
         int B = IR[PC][7]; // tem?
 
-        int V1 = 0, V2 = 0, V3 = 0, V4 = 0, VEM = 0;
+        int V1 = 0, V2 = 0, V3 = 0, V4 = 0, VAI = 0;
         
         auto calc1 = [&](int inva, int a, int ena) -> int{
             return (inva ^ (a & ena));
@@ -61,20 +61,21 @@ int main(){
         }
         else if (F0 && !F1){
             // ~B
-            if (calc2(B, ENB)){
-                V3 = (~B);
-            }
+            // if (calc2(B, ENB)){
+            //     V3 = (~B);
+            // }
+            V3 = (!B);
         }
         else if (F0 && F1){
             // Soma
             V4 = (((calc1(INVA, A, ENA) ^ INC) ^ (calc2(B, ENB))) & (F0 & F1));
-            VEM = ((calc1(INVA, A, ENA) & (calc2(B, ENB))) | ((calc1(INVA, A, ENA) ^ (calc2(B, ENB))) & INC));
+            VAI = ((calc1(INVA, A, ENA) & (calc2(B, ENB))) | ((calc1(INVA, A, ENA) ^ (calc2(B, ENB))) & INC));
         }
 
         int S = ((V1 | V2) | (V3 | V4));
 
         for (auto i : IR[PC]) cout << i;
-        cout << " PC:" << PC+1 << " A:" << A << " B:" << B << " S:" << S << " VEM:" << VEM << "\n";
+        cout << " PC:" << PC+1 << " A:" << A << " B:" << B << " S:" << S << " VAI:" << VAI << "\n";
 
         PC = PC + 1;
     }
