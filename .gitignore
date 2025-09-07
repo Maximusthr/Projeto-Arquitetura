@@ -1,6 +1,2 @@
-*.exe
-*.bin
-*.out
 .cph/
-output
 .vscode/
