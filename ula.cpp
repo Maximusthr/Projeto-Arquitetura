@@ -21,7 +21,8 @@ int main(){
     
     // As instruções virão de um arquivo
     fstream Entrada("programa_etapa1.txt");
-    fstream Saida("saida_etapa1.txt");
+    // O resultado sairá em um arquivo
+    ofstream Saida("saida_etapa1.txt");
     
     for (int i = 0; i < numInstrucoes; i++){
         // Para cada instrução (linha), colocará-a numa string
@@ -30,6 +31,8 @@ int main(){
             IR[i][j] = (s[j] - '0');
         }
     }
+
+    Entrada.close();
 
     while (PC < IR.size()){
 
@@ -81,7 +84,8 @@ int main(){
 
         for (auto i : IR[PC]) cout << i;
         cout << " PC:" << PC+1 << " A:" << A << " B:" << B << " S:" << S << " VAI:" << VAI << "\n";
-
+        Saida << F0 << F1 << ENA << ENB << INVA << INC << A << B << " PC:" << PC+1 << " A:" << A << " B:" << B << " S:" << S << " VAI:" << VAI << "\n";
+        
         PC = PC + 1;
     }
 }
