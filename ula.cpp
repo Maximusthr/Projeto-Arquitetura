@@ -18,9 +18,9 @@ int main() {
         vector<array<int, 8>> IR;
 
         // As instruções virão de um arquivo
-        fstream Entrada("programa_etapa1.txt");
+        fstream Entrada("programa_etapa2_tarefa1.txt");
         // O resultado sairá em um arquivo
-        ofstream Saida("saida_etapa1.txt");
+        ofstream Saida("saida_etapa2_tarefa1.txt");
 
         // Ler automaticamente todas as instruções (linhas) do arquivo de entrada
         vector<string> linhas;
