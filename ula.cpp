@@ -2,6 +2,34 @@
 
 using namespace std;
 
+void decodificador(int F0, int F1, int INVA, int ENA, int ENB, int INC, int A, int B, int& V1, int& V2, int& V3, int& V4, int& VAI) {
+
+        auto calc1 = [&](int inva, int a, int ena) -> int {
+                return (inva ^ (a & ena));
+        };
+
+        auto calc2 = [&](int b, int enb) -> int {
+                return (b & enb);
+        };
+        if (!F0 && !F1) {
+                // A & B
+                V1 = ((calc1(INVA, A, ENA)) & (calc2(B, ENB)));
+        } else if (!F0 && F1) {
+                // A + B
+                V2 = ((calc1(INVA, A, ENA)) | (calc2(B, ENB)));
+        } else if (F0 && !F1) {
+                // ~B
+                // if (calc2(B, ENB)){
+                //     V3 = (~B);
+                // }
+                V3 = (!B);
+        } else if (F0 && F1) {
+                // Soma
+                V4 = (((calc1(INVA, A, ENA) ^ INC) ^ (calc2(B, ENB))) & (F0 & F1));
+                VAI = ((calc1(INVA, A, ENA) & (calc2(B, ENB))) | ((calc1(INVA, A, ENA) ^ (calc2(B, ENB))) & INC));
+        }
+}
+
 int main() {
         // ios_base::sync_with_stdio(0);
         // cin.tie(NULL);
@@ -57,50 +85,24 @@ int main() {
 
                 int INC = IR[PC][7]; // Vem-um
 
-                
-                cout << "Digite A:" << "\n";
+                cout << "Digite A:" << endl;
                 int A;
                 cin >> A;
 
-                cout << "Digite B:" << "\n";
-                
+                cout << "Digite B:" << endl;
                 int B;
                 cin >> B;
 
                 int V1 = 0, V2 = 0, V3 = 0, V4 = 0, VAI = 0;
 
-                auto calc1 = [&](int inva, int a, int ena) -> int {
-                        return (inva ^ (a & ena));
-                };
-
-                auto calc2 = [&](int b, int enb) -> int {
-                        return (b & enb);
-                };
-
-                if (!F0 && !F1) {
-                        // A & B
-                        V1 = ((calc1(INVA, A, ENA)) & (calc2(B, ENB)));
-                } else if (!F0 && F1) {
-                        // A + B
-                        V2 = ((calc1(INVA, A, ENA)) | (calc2(B, ENB)));
-                } else if (F0 && !F1) {
-                        // ~B
-                        // if (calc2(B, ENB)){
-                        //     V3 = (~B);
-                        // }
-                        V3 = (!B);
-                } else if (F0 && F1) {
-                        // Soma
-                        V4 = (((calc1(INVA, A, ENA) ^ INC) ^ (calc2(B, ENB))) & (F0 & F1));
-                        VAI = ((calc1(INVA, A, ENA) & (calc2(B, ENB))) | ((calc1(INVA, A, ENA) ^ (calc2(B, ENB))) & INC));
-                }
+                decodificador(F0, F1, INVA, ENA, ENB, INC, A, B, V1, V2, V3, V4, VAI);
 
                 auto S = ((V1 | V2) | (V3 | V4));
 
                 int32_t Sd = S;
 
                 if (SLL8) {
-                        // Deslocamento lógico para a esquerda (acaba sendo igual ao desclocamento aritmético)
+                        // Deslocamento lógico para a esquerda (acaba sendo igual ao deslocamento aritmético)
                         Sd = S << 8;
                 }
 
