@@ -3,8 +3,8 @@
 using namespace std;
 
 int main() {
-        ios_base::sync_with_stdio(0);
-        cin.tie(NULL);
+        // ios_base::sync_with_stdio(0);
+        // cin.tie(NULL);
 
         // ler o arquivo
         // IR são todas as intruções
@@ -44,18 +44,28 @@ int main() {
 
         while (PC < IR.size()) {
 
-                int F0 = IR[PC][0];
-                int F1 = IR[PC][1];
+                int SLL8 = IR[PC][0]; // Deslocamento lógico para esquerda de 8 bits
+                int SRA1 = IR[PC][1]; // Deslocamento aritmético para a direita de 1 bit
 
-                int ENA = IR[PC][2];
-                int ENB = IR[PC][3];
+                int F0 = IR[PC][2];
+                int F1 = IR[PC][3];
 
-                int INVA = IR[PC][4];
+                int ENA = IR[PC][4];
+                int ENB = IR[PC][5];
 
-                int INC = IR[PC][5]; // Vem-um
+                int INVA = IR[PC][6];
 
-                int A = IR[PC][6]; // tem?
-                int B = IR[PC][7]; // tem?
+                int INC = IR[PC][7]; // Vem-um
+
+                
+                cout << "Digite A:" << "\n";
+                int A;
+                cin >> A;
+
+                cout << "Digite B:" << "\n";
+                
+                int B;
+                cin >> B;
 
                 int V1 = 0, V2 = 0, V3 = 0, V4 = 0, VAI = 0;
 
@@ -85,11 +95,28 @@ int main() {
                         VAI = ((calc1(INVA, A, ENA) & (calc2(B, ENB))) | ((calc1(INVA, A, ENA) ^ (calc2(B, ENB))) & INC));
                 }
 
-                int S = ((V1 | V2) | (V3 | V4));
+                auto S = ((V1 | V2) | (V3 | V4));
+
+                int32_t Sd = S;
+
+                if (SLL8) {
+                        // Deslocamento lógico para a esquerda (acaba sendo igual ao desclocamento aritmético)
+                        Sd = S << 8;
+                }
+
+                if (SRA1) {
+                        // Deslocamento aritmético para a direita
+                        Sd = S >> 1;
+                }
+
+                int N = (S < 0) ? 1 : 0;
+
+                int Z = (S == 0) ? 1 : 0;
 
                 for (auto i : IR[PC]) cout << i;
-                cout << " PC:" << PC + 1 << " A:" << A << " B:" << B << " S:" << S << " VAI:" << VAI << "\n";
-                Saida << F0 << F1 << ENA << ENB << INVA << INC << A << B << " PC:" << PC + 1 << " A:" << A << " B:" << B << " S:" << S << " VAI:" << VAI << "\n";
+                cout << " PC:" << PC + 1 << " A:" << A << " B:" << B << " S:" << S << " VAI:" << VAI << " Sd: " << Sd << "\n";
+                for (auto i : IR[PC]) Saida << i;
+                Saida << " PC:" << PC + 1 << " A:" << A << " B:" << B << " S:" << S << " VAI:" << VAI << " Sd: " << Sd << "\n";
 
                 PC = PC + 1;
         }
