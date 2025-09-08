@@ -2,7 +2,7 @@
 
 using namespace std;
 
-void decodificador(int F0, int F1, int INVA, int ENA, int ENB, int INC, int A, int B, int& V1, int& V2, int& V3, int& V4, int& VAI) {
+void decodificadorSinaisULA(int F0, int F1, int INVA, int ENA, int ENB, int INC, int A, int B, int& V1, int& V2, int& V3, int& V4, int& VAI) {
 
         auto calc1 = [&](int inva, int a, int ena) -> int {
                 return (inva ^ (a & ena));
@@ -31,9 +31,6 @@ void decodificador(int F0, int F1, int INVA, int ENA, int ENB, int INC, int A, i
 }
 
 int main() {
-        // ios_base::sync_with_stdio(0);
-        // cin.tie(NULL);
-
         // ler o arquivo
         // IR são todas as intruções
         // PC é a linha do IR
@@ -85,17 +82,22 @@ int main() {
 
                 int INC = IR[PC][7]; // Vem-um
 
-                cout << "Digite A:" << endl;
-                int A;
-                cin >> A;
+                int32_t H, OPC, TOS, CPP, LV, SP, PC, MDR, MAR;
+                uint8_t MBR;
 
+                string temp;
+
+                cout << "Digite A:" << endl;
+                getline(cin, temp);
+                int A = stoi(temp, nullptr, 2); // Transforma a string em um número binário
+                
                 cout << "Digite B:" << endl;
-                int B;
-                cin >> B;
+                getline(cin, temp);
+                int B = stoi(temp, nullptr, 2); // Transforma a string em um número binário
 
                 int V1 = 0, V2 = 0, V3 = 0, V4 = 0, VAI = 0;
 
-                decodificador(F0, F1, INVA, ENA, ENB, INC, A, B, V1, V2, V3, V4, VAI);
+                decodificadorSinaisULA(F0, F1, INVA, ENA, ENB, INC, A, B, V1, V2, V3, V4, VAI);
 
                 auto S = ((V1 | V2) | (V3 | V4));
 
