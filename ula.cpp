@@ -173,6 +173,34 @@ void seletorBarramentoC(std::array<int, 21> instrucao, int32_t Sd,
         if (instrucao[16])
                 MAR = Sd; // bit 0 - MAR
 }
+ 
+string conversor_binario (int valor){
+        string s = "";
+        for (int i = 0; i < 32; i++){
+                if ((valor & (1 << i))){
+                        s.push_back('1');
+                }
+                else s.push_back('0');
+        }
+
+        reverse(s.begin(), s.end());
+
+        return s;
+}
+
+string conversor_MBR (int valor){
+        string s = "";
+        for (int i = 0; i < 8; i++){
+                if ((valor & (1 << i))){
+                        s.push_back('1');
+                }
+                else s.push_back('0');
+        }
+
+        reverse(s.begin(), s.end());
+
+        return s;
+}
 
 int main() {
         // ler o arquivo
@@ -191,7 +219,7 @@ int main() {
         // O estado inicial dos registradores virá de um arquivo
         fstream Registradores("projeto_arquitetura_testes/registradores_etapa2_tarefa2.txt");
         // O resultado sairá em um arquivo
-        ofstream Saida("saida_etapa2_tarefa2.txt");
+        ofstream Saida("./saida_etapa2_tarefa2.txt");
 
         // Ler automaticamente todas as instruções (linhas) do arquivo de entrada
         vector<string> linhasEntrada;
@@ -276,9 +304,15 @@ int main() {
 
                 seletorBarramentoC(IR[PC], Sd, H, OPC, TOS, CPP, LV, SP, PC_registrador, MDR, MAR);
 
+                
+                Saida << "Convertendo para binario:" << endl;
+                Saida << "H=" << conversor_binario(H) << "\nOPC=" << conversor_binario(OPC) << "\nTOS=" << conversor_binario(TOS)
+                        << "\nCPP=" << conversor_binario(CPP) << "\nLV=" << conversor_binario(LV)<< "\nSP=" << conversor_binario(SP) 
+                        << "\nPC=" << conversor_binario(PC_registrador) << "\nMDR=" << conversor_binario(MDR) << "\nMAR=" << conversor_binario(MAR)
+                        << "\nMBR=" << conversor_MBR((int)MBR) << endl << endl;
+
                 Saida << "Registradores no Fim:" << endl;
-                Saida << "H=" << H << " OPC=" << OPC << " TOS=" << TOS << " CPP=" << CPP << " LV=" << LV << " SP=" << SP << " PC=" << PC_registrador << " MDR=" << MDR << " MAR=" << MAR << " MBR=" << (int)MBR << endl
-                      << endl;
+                Saida << "H=" << H << " OPC=" << OPC << " TOS=" << TOS << " CPP=" << CPP << " LV=" << LV << " SP=" << SP << " PC=" << PC_registrador << " MDR=" << MDR << " MAR=" << MAR << " MBR=" << (int)MBR << endl << endl;
                 PC = PC + 1;
         }
 }
