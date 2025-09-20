@@ -250,8 +250,8 @@ int main() {
 
         while (PC < IR.size()) {
 
-                int SLL8 = IR[PC][0]; // Deslocamento lógico para esquerda de 8 bits
-                int SRA1 = IR[PC][1]; // Deslocamento aritmético para a direita de 1 bit
+                int SLL8 = IR[PC][0]; // Deslocamento logico para esquerda de 8 bits
+                int SRA1 = IR[PC][1]; // Deslocamento aritmetico para a direita de 1 bit
 
                 int F0 = IR[PC][2];
                 int F1 = IR[PC][3];
