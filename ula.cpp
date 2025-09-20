@@ -36,29 +36,32 @@ void carregarRegistradores(fstream& Registradores, int32_t& MAR, int32_t& MDR, i
 
 void decodificadorSinaisULA(int F0, int F1, int INVA, int ENA, int ENB, int INC, int A, int B, int& V1, int& V2, int& V3, int& V4, int& VAI) {
 
-        auto calc1 = [&](int inva, int a, int ena) -> int {
-                return (inva ^ (a & ena));
-        };
+        int32_t entrada_A = 0;
+        int32_t entrada_B = 0;
+        if (ENA) {
+                entrada_A = INVA ? ~A : A;
+        }
 
-        auto calc2 = [&](int b, int enb) -> int {
-                return (b & enb);
-        };
+        if (ENB) {
+                entrada_B = B;
+        }
+
         if (!F0 && !F1) {
                 // A & B
-                V1 = ((calc1(INVA, A, ENA)) & (calc2(B, ENB)));
+                V1 = (entrada_A & entrada_B);
         } else if (!F0 && F1) {
                 // A + B
-                V2 = ((calc1(INVA, A, ENA)) | (calc2(B, ENB)));
+                V2 = (entrada_A | entrada_B);
         } else if (F0 && !F1) {
                 // ~B
                 // if (calc2(B, ENB)){
                 //     V3 = (~B);
                 // }
-                V3 = (~B);
+                V3 = (~entrada_B);
         } else if (F0 && F1) {
                 // Soma
-                V4 = calc1(INVA, A, ENA) ^ calc2(B, ENB) ^ INC;
-                VAI = (calc1(INVA, A, ENA) & calc2(B, ENB)) | ((calc1(INVA, A, ENA) ^ calc2(B, ENB)) & INC);
+                V4 = (entrada_A ^ entrada_B) ^ INC;
+                VAI = ((entrada_A & entrada_B) | ((entrada_A ^ entrada_B) & INC));
         }
 }
 
