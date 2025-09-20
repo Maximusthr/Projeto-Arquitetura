@@ -20,16 +20,16 @@ void carregarRegistradores(fstream& Registradores, int32_t& MAR, int32_t& MDR, i
         }
 
         // Atribuindo os valores aos registradores
-        MAR = valores["MAR"];
-        MDR = valores["MDR"];
-        PC = valores["PC"];
-        MBR = static_cast<uint8_t>(valores["MBR"]);
-        SP = valores["SP"];
-        LV = valores["LV"];
-        CPP = valores["CPP"];
-        TOS = valores["TOS"];
-        OPC = valores["OPC"];
-        H = valores["H"];
+        MAR = valores["mar"];
+        MDR = valores["mdr"];
+        PC = valores["pc"];
+        MBR = static_cast<uint8_t>(valores["mbr"]);
+        SP = valores["sp"];
+        LV = valores["lv"];
+        CPP = valores["cpp"];
+        TOS = valores["tos"];
+        OPC = valores["opc"];
+        H = valores["h"];
 
         Registradores.close();
 }
@@ -54,11 +54,11 @@ void decodificadorSinaisULA(int F0, int F1, int INVA, int ENA, int ENB, int INC,
                 // if (calc2(B, ENB)){
                 //     V3 = (~B);
                 // }
-                V3 = (!B);
+                V3 = (~B);
         } else if (F0 && F1) {
                 // Soma
-                V4 = (((calc1(INVA, A, ENA) ^ INC) ^ (calc2(B, ENB))) & (F0 & F1));
-                VAI = ((calc1(INVA, A, ENA) & (calc2(B, ENB))) | ((calc1(INVA, A, ENA) ^ (calc2(B, ENB))) & INC));
+                V4 = calc1(INVA, A, ENA) ^ calc2(B, ENB) ^ INC;
+                VAI = (calc1(INVA, A, ENA) & calc2(B, ENB)) | ((calc1(INVA, A, ENA) ^ calc2(B, ENB)) & INC);
         }
 }
 
@@ -236,8 +236,10 @@ int main() {
                 Saida << "Instrução (IR): " << linhasEntrada[PC] << endl;
                 Saida << "Registradores no Início:" << endl;
                 Saida << "H=" << H << " OPC=" << OPC << " TOS=" << TOS << " CPP=" << CPP << " LV=" << LV << " SP=" << SP << " PC=" << PC_registrador << " MDR=" << MDR << " MAR=" << MAR << " MBR=" << (int)MBR << endl;
-
+                
                 int8_t codigoB = (IR[PC][17] << 3) | (IR[PC][18] << 2) | (IR[PC][19] << 1) | IR[PC][20];
+                Saida << "Barramento B comandado por: " << nomeDoRegistradorNoBarramentoB(codigoB) << endl;
+                Saida << "Barramento C habilitado para: " << nomesDosRegistradoresC(IR[PC]) << endl;
 
                 // Na Mic-1, o A é sempre H
                 int32_t A = H;
@@ -268,8 +270,6 @@ int main() {
 
                 int Z = (Sd == 0) ? 1 : 0;
 
-                Saida << "Barramento B comandado por: " << nomeDoRegistradorNoBarramentoB(codigoB) << endl;
-                Saida << "Barramento C habilitado para: " << nomesDosRegistradoresC(IR[PC]) << endl;
 
                 seletorBarramentoC(IR[PC], Sd, H, OPC, TOS, CPP, LV, SP, PC_registrador, MDR, MAR);
 
