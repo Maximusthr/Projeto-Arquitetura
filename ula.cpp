@@ -2,6 +2,37 @@
 
 using namespace std;
 
+void carregarRegistradores(fstream& Registradores, int32_t& MAR, int32_t& MDR, int32_t& PC, uint8_t& MBR, int32_t& SP, int32_t& LV, int32_t& CPP, int32_t& TOS, int32_t& OPC, int32_t& H) {
+        string linha;
+        map<string, int32_t> valores;
+
+        while(getline(Registradores, linha)) {
+                int pos = linha.find('=');
+                if (pos == string::npos) continue;
+                string nome = linha.substr(0, pos);
+                string valorBinario = linha.substr(pos + 1);
+        
+                // Remover espaços
+                nome.erase(remove_if(nome.begin(), nome.end(), ::isspace), nome.end());
+                valorBinario.erase(remove_if(valorBinario.begin(), valorBinario.end(), ::isspace), valorBinario.end());
+                valores[nome] = stoi(valorBinario);
+        }
+
+        // Atribuindo os valores aos registradores
+        MAR = valores["MAR"];
+        MDR = valores["MDR"];
+        PC = valores["PC"];
+        MBR = static_cast<uint8_t>(valores["MBR"]);
+        SP = valores["SP"];
+        LV = valores["LV"];
+        CPP = valores["CPP"];
+        TOS = valores["TOS"];
+        OPC = valores["OPC"];
+        H = valores["H"];
+
+        Registradores.close();
+}
+
 void decodificadorSinaisULA(int F0, int F1, int INVA, int ENA, int ENB, int INC, int A, int B, int& V1, int& V2, int& V3, int& V4, int& VAI) {
 
         auto calc1 = [&](int inva, int a, int ena) -> int {
@@ -98,23 +129,25 @@ int main() {
         vector<array<int, 21>> IR;
 
         // As instruções virão de um arquivo
-        fstream Entrada("programa_etapa2_tarefa1.txt");
+        fstream Entrada("projeto_arquitetura_testes/programa_etapa2_tarefa2.txt");
+        // O estado inicial dos registradores virá de um arquivo
+        fstream Registradores("projeto_arquitetura_testes/registradores_etapa2_tarefa2.txt");
         // O resultado sairá em um arquivo
-        ofstream Saida("saida_etapa2_tarefa1.txt");
+        ofstream Saida("saida_etapa2_tarefa2.txt");
 
         // Ler automaticamente todas as instruções (linhas) do arquivo de entrada
-        vector<string> linhas;
+        vector<string> linhasEntrada;
         string s;
         while (Entrada >> s) {
                 // ignora linhas vazias ou curtas
                 if (s.size() != 21)
                         continue;
-                linhas.push_back(s);
+                linhasEntrada.push_back(s);
         }
 
-        IR.resize(linhas.size());
-        for (int i = 0; i < linhas.size(); ++i) {
-                string linha = linhas[i];
+        IR.resize(linhasEntrada.size());
+        for (int i = 0; i < linhasEntrada.size(); ++i) {
+                string linha = linhasEntrada[i];
                 for (int j = 0; j < 21; j++) {
                         IR[i][j] = (linha[j] - '0');
                 }
@@ -125,7 +158,9 @@ int main() {
         int32_t H = 0, OPC = 0, TOS = 0, CPP = 0, LV = 0, SP = 0, MDR = 0, MAR = 0;
         uint8_t MBR = 0;
 
-        
+        int32_t PC_registrador = 0;
+
+        carregarRegistradores(Registradores, MAR, MDR, PC_registrador, MBR, SP, LV, CPP, TOS, OPC, H);
 
         while (PC < IR.size()) {
 
@@ -147,7 +182,7 @@ int main() {
                 // Na Mic-1, o A é sempre H
                 int32_t A = H;
 
-                int32_t B = decodificadorBarramentoB(codigoB, MDR, PC, MBR, SP, LV, CPP, TOS, OPC);
+                int32_t B = decodificadorBarramentoB(codigoB, MDR, PC_registrador, MBR, SP, LV, CPP, TOS, OPC);
 
                 string temp;
 
@@ -173,12 +208,12 @@ int main() {
 
                 int Z = (Sd == 0) ? 1 : 0;
 
-                seletorBarramentoC(IR[PC], Sd, H, OPC, TOS, CPP, LV, SP, PC, MDR, MAR);
+                seletorBarramentoC(IR[PC], Sd, H, OPC, TOS, CPP, LV, SP, PC_registrador, MDR, MAR);
 
                 for (auto i : IR[PC]) cout << i;
-                cout << " PC:" << PC + 1 << " A:" << A << " B:" << B << " S:" << S << " VAI:" << VAI << " Sd: " << Sd << "\n";
+                cout << " PC:" << PC + 1 << " PC_registrador:" << PC_registrador << " A:" << A << " B:" << B << " S:" << S << " VAI:" << VAI << " Sd: " << Sd << "\n";
                 for (auto i : IR[PC]) Saida << i;
-                Saida << " PC:" << PC + 1 << " A:" << A << " B:" << B << " S:" << S << " VAI:" << VAI << " Sd: " << Sd << "\n";
+                Saida << " PC:" << PC + 1 << " PC_registrador:" << PC_registrador << " A:" << A << " B:" << B << " S:" << S << " VAI:" << VAI << " Sd: " << Sd << "\n";
 
                 PC = PC + 1;
         }
