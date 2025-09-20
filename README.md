@@ -30,8 +30,6 @@ O objetivo deste projeto é estudar, implementar e simular uma versão modificad
 
 ## :gear: Como rodar
 
-readme := `## Como Rodar
-
 ### Requisitos e Recomendações
 
 Para compilar e executar o arquivo `ula.cpp`, você precisa de um compilador C++ moderno. Recomendamos o uso do **GCC** (no Linux) ou **MinGW** (no Windows).
