@@ -6,16 +6,17 @@ void carregarRegistradores(fstream& Registradores, int32_t& MAR, int32_t& MDR, i
         string linha;
         map<string, int32_t> valores;
 
-        while(getline(Registradores, linha)) {
+        while (getline(Registradores, linha)) {
                 int pos = linha.find('=');
-                if (pos == string::npos) continue;
+                if (pos == string::npos)
+                        continue;
                 string nome = linha.substr(0, pos);
                 string valorBinario = linha.substr(pos + 1);
-        
+
                 // Remover espaços
                 nome.erase(remove_if(nome.begin(), nome.end(), ::isspace), nome.end());
                 valorBinario.erase(remove_if(valorBinario.begin(), valorBinario.end(), ::isspace), valorBinario.end());
-                valores[nome] = stoi(valorBinario);
+                valores[nome] = stoi(valorBinario, nullptr, 2);
         }
 
         // Atribuindo os valores aos registradores
@@ -92,6 +93,60 @@ int32_t decodificadorBarramentoB(uint8_t codigoB, int32_t MDR, int32_t PC, uint8
         }
 }
 
+string nomeDoRegistradorNoBarramentoB(uint8_t codigoB) {
+        switch (codigoB) {
+        case 0:
+                return "MDR";
+
+        case 1:
+                return "PC";
+
+        case 2:
+                return "MBR (signed)";
+
+        case 3:
+                return "MBR (unsigned)";
+
+        case 4:
+                return "SP";
+
+        case 5:
+                return "LV";
+
+        case 6:
+                return "CPP";
+
+        case 7:
+                return "TOS";
+
+        default:
+                return "OPC";
+        }
+}
+
+string nomesDosRegistradoresC(array<int, 21>& instrucao) {
+        vector<string> nomes = {"H", "OPC", "TOS", "CPP", "LV", "SP", "PC", "MDR", "MAR"};
+        string resultado;
+        bool primeiro = true;
+
+        for (size_t i = 0; i < nomes.size(); ++i) {
+                // Verifica o bit correspondente (índices 8 a 16)
+                if (instrucao[8 + i]) {
+                        if (!primeiro) {
+                                resultado += ", ";
+                        }
+                        resultado += nomes[i];
+                        primeiro = false;
+                }
+        }
+
+        if (resultado.empty()) {
+                return "Nenhum";
+        }
+
+        return resultado;
+}
+
 void seletorBarramentoC(std::array<int, 21> instrucao, int32_t Sd,
                         int32_t& H, int32_t& OPC, int32_t& TOS, int32_t& CPP,
                         int32_t& LV, int32_t& SP, int32_t& PC, int32_t& MDR, int32_t& MAR) {
@@ -154,7 +209,7 @@ int main() {
         }
 
         Entrada.close();
-        
+
         int32_t H = 0, OPC = 0, TOS = 0, CPP = 0, LV = 0, SP = 0, MDR = 0, MAR = 0;
         uint8_t MBR = 0;
 
@@ -176,6 +231,11 @@ int main() {
                 int INVA = IR[PC][6];
 
                 int INC = IR[PC][7]; // Vem-um
+
+                Saida << "--- Instrução " << PC + 1 << " ---" << endl;
+                Saida << "Instrução (IR): " << linhasEntrada[PC] << endl;
+                Saida << "Registradores no Início:" << endl;
+                Saida << "H=" << H << " OPC=" << OPC << " TOS=" << TOS << " CPP=" << CPP << " LV=" << LV << " SP=" << SP << " PC=" << PC_registrador << " MDR=" << MDR << " MAR=" << MAR << " MBR=" << (int)MBR << endl;
 
                 int8_t codigoB = (IR[PC][17] << 3) | (IR[PC][18] << 2) | (IR[PC][19] << 1) | IR[PC][20];
 
@@ -208,13 +268,14 @@ int main() {
 
                 int Z = (Sd == 0) ? 1 : 0;
 
+                Saida << "Barramento B comandado por: " << nomeDoRegistradorNoBarramentoB(codigoB) << endl;
+                Saida << "Barramento C habilitado para: " << nomesDosRegistradoresC(IR[PC]) << endl;
+
                 seletorBarramentoC(IR[PC], Sd, H, OPC, TOS, CPP, LV, SP, PC_registrador, MDR, MAR);
 
-                for (auto i : IR[PC]) cout << i;
-                cout << " PC:" << PC + 1 << " PC_registrador:" << PC_registrador << " A:" << A << " B:" << B << " S:" << S << " VAI:" << VAI << " Sd: " << Sd << "\n";
-                for (auto i : IR[PC]) Saida << i;
-                Saida << " PC:" << PC + 1 << " PC_registrador:" << PC_registrador << " A:" << A << " B:" << B << " S:" << S << " VAI:" << VAI << " Sd: " << Sd << "\n";
-
+                Saida << "Registradores no Fim:" << endl;
+                Saida << "H=" << H << " OPC=" << OPC << " TOS=" << TOS << " CPP=" << CPP << " LV=" << LV << " SP=" << SP << " PC=" << PC_registrador << " MDR=" << MDR << " MAR=" << MAR << " MBR=" << (int)MBR << endl
+                      << endl;
                 PC = PC + 1;
         }
 }
