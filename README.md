@@ -31,67 +31,73 @@ O objetivo deste projeto é estudar, implementar e simular uma versão modificad
 
 ## :spiral_notepad: Comentários:
 
-### Comentários gerais:
-  - Este programa simula a execução de instruções específicas da IJVM que controlam registradores e memória.
-  - Foi projetado para interpretar microinstruções de 23 bits (representadas como strings de '0' e '1') e sequências de instruções dealto nível que são traduzidas em microinstruções.
-  <br>
-  - Registradores simulados (nomes e propósito):
-    MAR  : Memory Address Register - endereço lido/escrito em memória
-    MDR  : Memory Data Register - dado lido/escrito em memória
-    PC   : Program Counter (neste simulador existe PC_registrador separado do PC lido de IR)
-    MBR  : Memory Buffer Register (8-bit) - usa-se tanto como signed quanto unsigned
-    SP   : Stack Pointer
-    LV   : Local variables pointer/frame pointer (conforme arquitetura do trabalho)
-    CPP  : Constant Pool Pointer (uso conforme especificação do trabalho)
-    TOS  : Top Of Stack (topo da pilha)
-    OPC  : Operacional Code? (conforme trabalho — usado para debug/registro)
-    H    : Registrador temporário (usado como operando A em ULA)
-<br>
-  - Memória de dados:
-  MEM é um vetor de int32_t onde cada posição corresponde a uma "palavra" de 32 bits
-  (lida de arquivo binário textual — cada token com 32 caracteres '0'/'1').
+### Comentários gerais:  
 
-### Microinstrução de 23 bits (mapeamento de bits):
+- Este programa simula a execução de instruções específicas da IJVM que controlam registradores e memória.
+- Foi projetado para interpretar microinstruções de 23 bits (representadas como strings de '0' e '1') e sequências de instruções dealto nível que são traduzidas em microinstruções.  
+
+**Registradores simulados (nomes e propósito):**  
+
+- MAR  : Memory Address Register - endereço lido/escrito em memória
+- MDR  : Memory Data Register - dado lido/escrito em memória
+- PC   : Program Counter (neste simulador existe PC_registrador separado do PC lido de IR)
+- MBR  : Memory Buffer Register (8-bit) - usa-se tanto como signed quanto unsigned
+- SP   : Stack Pointer
+- LV   : Local variables pointer/frame pointer (conforme arquitetura do trabalho)
+- CPP  : Constant Pool Pointer (uso conforme especificação do trabalho)
+- TOS  : Top Of Stack (topo da pilha)
+- OPC  : Operacional Code? (conforme trabalho — usado para debug/registro)
+- H    : Registrador temporário (usado como operando A em ULA)    
+
+- Memória de dados: MEM é um vetor de int32_t onde cada posição corresponde a uma "palavra" de 32 bits (lida de arquivo binário textual — cada token com 32 caracteres '0'/'1').
+
+### Microinstrução de 23 bits (mapeamento de bits):  
+
 Bits da ULA:
-[0]   desloca Sd << 8 (SEXT? depende da especificação do trabalho) - SLL8
-[1]   desloca Sd >> 1 - SRA1
-[2]   F0  (ULA)
-[3]   F1  (ULA) 
-[4]   ENA (controle para habilitar A) 
-[5]   ENB (controle para habilitar B)
-[6]   INVA (controle para inverter A)
-[7]   INC (carry-in para soma) - Vem-um
+- [0]   desloca Sd << 8 (SEXT? depende da especificação do trabalho) - SLL8
+- [1]   desloca Sd >> 1 - SRA1
+- [2]   F0  (ULA)
+- [3]   F1  (ULA) 
+- [4]   ENA (controle para habilitar A) 
+- [5]   ENB (controle para habilitar B)
+- [6]   INVA (controle para inverter A)
+- [7]   INC (carry-in para soma) - Vem-um
 
 Bits do Barramento C:
-[8..16] bits de seleção do barramento C (escrevem Sd em registradores) - De acordo com a decodificação fornecida
+- [8..16] bits de seleção do barramento C (escrevem Sd em registradores) - De acordo com a decodificação fornecida
 
 Bits de controle de memória:
-[17]  WRITE (se 1 então operação de escrita na memória está habilitada)
-[18]  READ  (se 1 então operação de leitura na memória está habilitada) 
+- [17]  WRITE (se 1 então operação de escrita na memória está habilitada)
+- [18]  READ  (se 1 então operação de leitura na memória está habilitada) 
 (Caso ambos sejam 1, corresponde a operação de fetch realizada por MBR)
 
 Bits do Barramento B: 
-[19..22] código de 4 bits que seleciona qual registrador está no barramento B
+- [19..22] código de 4 bits que seleciona qual registrador está no barramento B
 
 ### Observação sobre o 'FETCH' especial para BIPUSH:
+
 Para a instrução BIPUSH há uma microinstrução especial que contém os 8 bits do parâmetro (byte) nos primeiros 8 bits da microinstrução. 
 Quando a microinstrução tiver simultaneamente READ=1 e WRITE=1 (condição usada aqui para identificaresse caso), o simulador trata isso como um FETCH do byte para o MBR e H.
 
-- Arquivos de entrada esperados:
-1) "memoria_inicial.txt": tokens de 32 caracteres binários (cada token -> palavra de 32 bits).
-2) "registrador_inicial.txt": arquivo contendo linhas no formato:
-nome_registrador = <valor_binario>
-Exemplo:
-mar = 00000000000000000000000000000101
-mdr = 00000000000000000000000000000000
+- Arquivos de entrada esperados (até etapa 3.1):
+
+1. "memoria_inicial.txt": tokens de 32 caracteres binários (cada token -> palavra de 32 bits).
+2. "registrador_inicial.txt": arquivo contendo linhas no formato:  
+nome_registrador = <valor_binario>  
+Exemplo:  
+mar = 00000000000000000000000000000101  
+mdr = 00000000000000000000000000000000  
 ...
-Observação: os nomes esperados (em minúsculas) são:
-mar, mdr, pc, mbr, sp, lv, cpp, tos, opc, h
-O campo mbr será convertido para uint8_t (somente os 8 LSB do valor binário).
- *
-- Arquivo de saída:
-"./saida_etapa3_tarefa1.txt" - contém logs detalhados da execução de cada
+**Observação:** os nomes esperados (em minúsculas) são:  
+mar, mdr, pc, mbr, sp, lv, cpp, tos, opc, h  
+O campo mbr será convertido para uint8_t (somente os 8 LSB do valor binário).  
+ 
+- Arquivo de saída:  
+  
+- "./saida_etapa3_tarefa1.txt" - contém logs detalhados da execução de cada
 microinstrução, estado dos registradores antes/depois e dump da memória.
+
+**Projeto completo:** Permite as entradas ```ILOAD x```, ```BIPUSH``` e ```DUP```, em um arquivo ```"instrucoes.txt"```, ```"memoria_inicial.txt"``` com a memória inicial e ```"registrador_inicial.txt"```com o estado inicial dos registradores.
 
 ## :gear: Como rodar
 
