@@ -80,7 +80,7 @@ int32_t decodificadorBarramentoB(uint8_t codigoB, int32_t MDR, int32_t PC, uint8
                 return static_cast<int32_t>(static_cast<int8_t>(MBR));
 
         case 3:
-                return static_cast<int32_t>(static_cast<uint8_t>(MBR));
+                return static_cast<int32_t>(MBR);
 
         case 4:
                 return SP;
@@ -176,20 +176,6 @@ void seletorBarramentoC(std::array<int, 23> instrucao, int32_t Sd,
 string conversor_binario(int valor) {
         string s = "";
         for (int i = 0; i < 32; i++) {
-                if ((valor & (1 << i))) {
-                        s.push_back('1');
-                } else
-                        s.push_back('0');
-        }
-
-        reverse(s.begin(), s.end());
-
-        return s;
-}
-
-string conversor_MBR(int valor) {
-        string s = "";
-        for (int i = 0; i < 8; i++) {
                 if ((valor & (1 << i))) {
                         s.push_back('1');
                 } else
@@ -310,69 +296,38 @@ void executar_microinstrucoes(vector<array<int, 23>>& micro_instrucoes,
 }
 
 int main() {
-        // ler o arquivo
-        // IR são todas as intruções
-        // PC é a linha do IR
-
-        // F0 - F1 - ENA - ENB - INVA - INC - A - B
-
-        // Cada execução devemos anotar: IR - PC - A - B - S - Vai-um
-
-        int32_t PC = 0;
-        vector<array<int, 23>> IR;
-
-        vector<int32_t> MEM;
+        // --- CONFIGURAÇÃO DOS ARQUIVOS ---
         string caminho_instrucoes_alto_nivel = "instrucoes.txt";
-        // As instruções virão de um arquivo
-        fstream Entrada("registrador_inicial.txt");
-        // Os dados virão de um arquivo
         string caminho_dados = "memoria_inicial.txt";
-        // O estado inicial dos registradores virá de um arquivo
-        fstream Registradores("registrador_inicial.txt");
-        // O resultado sairá em um arquivo
-        ofstream Saida("./saida_etapa3_tarefa1.txt");
+        string caminho_registradores = "registrador_inicial.txt";
+        string caminho_saida = "saida.txt";
 
+        // --- INICIALIZAÇÃO ---
+        vector<int32_t> MEM;
         if (!lerMemoria32Bin(caminho_dados, MEM)) {
                 // Adiciona um tratamento de erro, caso o arquivo não seja encontrado
                 cerr << "ERRO: Não foi possível ler o arquivo de dados da memória: " << caminho_dados << endl;
                 return 1; // Encerra o programa se a memória não puder ser carregada
         }
-
-        // Ler automaticamente todas as instruções (linhas) do arquivo de entrada
-        vector<string> linhasEntrada;
-        string s;
-        while (Entrada >> s) {
-                // ignora linhas vazias ou curtas
-                if (s.size() != 23)
-                        continue;
-                linhasEntrada.push_back(s);
-        }
-
-        IR.resize(linhasEntrada.size());
-        for (int i = 0; i < linhasEntrada.size(); ++i) {
-                string linha = linhasEntrada[i];
-                for (int j = 0; j < 23; j++) {
-                        IR[i][j] = (linha[j] - '0');
-                }
-        }
-
-        Entrada.close();
-
+        
+        fstream Registradores("registrador_inicial.txt");
         int32_t H = 0, OPC = 0, TOS = 0, CPP = 0, LV = 0, SP = 0, MDR = 0, MAR = 0;
         uint8_t MBR = 0;
         int32_t PC_registrador = 0;
-
+        
         carregarRegistradores(Registradores, MAR, MDR, PC_registrador, MBR, SP, LV, CPP, TOS, OPC, H);
-
+        
         ifstream MaquinaVirtual(caminho_instrucoes_alto_nivel);
         if (!MaquinaVirtual) {
                 cerr << "ERRO: Não foi possível ler o arquivo de instruções " << caminho_instrucoes_alto_nivel << endl;
                 return 1;
         }
-
+        
+        ofstream Saida(caminho_saida);
         string linha_instrucao;
         int ciclo_global = 1;
 
+        // --- DEFINIÇÃO DAS MICROINSTRUÇÕES ---
         const auto H_EQ_LV = string_para_microinstrucao("00010100100000000000101");
         const auto H_EQ_H_MAIS_1 = string_para_microinstrucao("00111001100000000000000");
         const auto MAR_EQ_H_RD = string_para_microinstrucao("00111000000000001010000");
