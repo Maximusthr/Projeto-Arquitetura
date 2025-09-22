@@ -32,7 +32,7 @@ O objetivo deste projeto é estudar, implementar e simular uma versão modificad
 
 ### Requisitos e Recomendações
 
-Para compilar e executar o arquivo `ula.cpp`, você precisa de um compilador C++ moderno. Recomendamos o uso do **GCC** (no Linux) ou **MinGW** (no Windows).
+Para compilar e executar o arquivo `mic.cpp`, você precisa de um compilador C++ moderno. Recomendamos o uso do **GCC** (no Linux) ou **MinGW** (no Windows).
 
 - **GCC (Linux)**: normalmente já vem instalado em distribuições Linux. Caso não tenha, instale com:
   ```bash
@@ -49,8 +49,8 @@ Para compilar e executar o arquivo `ula.cpp`, você precisa de um compilador C++
 #### No Linux
 
 ```bash
-g++ ula.cpp -o ula
-./ula
+g++ mic.cpp -o mic
+./mic
 ```
 
 #### No Windows (com MinGW)
@@ -58,8 +58,8 @@ g++ ula.cpp -o ula
 Abra o terminal (cmd ou PowerShell) e execute:
 
 ```bash
-g++ ula.cpp -o ula.exe
-ula.exe
+g++ mic.cpp -o mic.exe
+mic.exe
 ```
 
 > Certifique-se de que o comando `g++` está disponível no terminal (variável de ambiente PATH corretamente configurada).
