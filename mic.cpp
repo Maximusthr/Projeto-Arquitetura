@@ -213,6 +213,16 @@ array<int, 23> string_para_microinstrucao(const string& s) {
         return micro;
 }
 
+string decimal_para_binario8(int n) {
+        string binario(8, '0');
+        for (int i = 7; i >= 0; --i) {
+                if ((n >> i) & 1) {
+                        binario[7 - i] = '1';
+                }
+        }
+        return binario;
+}
+
 void executar_microinstrucoes(vector<array<int, 23>>& micro_instrucoes,
                               int32_t& H, int32_t& OPC, int32_t& TOS, int32_t& CPP, int32_t& LV, int32_t& SP, int32_t& PC_registrador, int32_t& MDR, int32_t& MAR, uint8_t& MBR,
                               vector<int32_t>& MEM,
@@ -225,7 +235,7 @@ void executar_microinstrucoes(vector<array<int, 23>>& micro_instrucoes,
                 Saida << "Instrução (IR): " << instrucao_str << endl;
 
                 Saida << "Registradores no Início:" << endl;
-                Saida << "H=" << H << " OPC=" << OPC << " TOS=" << TOS << " CPP=" << CPP << " LV=" << LV << " SP=" << SP << " PC=" << PC_registrador << " MDR=" << MDR << " MAR=" << MAR << " MBR=" << (int)MBR << endl;
+                Saida << "H = " << H << " OPC = " << OPC << " TOS = " << TOS << " CPP = " << CPP << " LV = " << LV << " SP = " << SP << " PC = " << PC_registrador << " MDR = " << MDR << " MAR = " << MAR << " MBR = " << (int)MBR << endl;
 
                 // Decodifica e executa exatamente como antes
                 int WRITE = instrucao_atual[17];
@@ -233,7 +243,7 @@ void executar_microinstrucoes(vector<array<int, 23>>& micro_instrucoes,
                 uint8_t codigoB = (instrucao_atual[19] << 3) | (instrucao_atual[20] << 2) | (instrucao_atual[21] << 1) | (instrucao_atual[22]);
 
                 Saida << "Barramento B comandado por: " << nomeDoRegistradorNoBarramentoB(codigoB) << endl;
-                Saida << "Barramento C habilitado para: " << nomesDosRegistradoresC(instrucao_atual) << " | READ =" << READ << " WRITE" << WRITE << endl;
+                Saida << "Barramento C habilitado para: " << nomesDosRegistradoresC(instrucao_atual) << " | READ = " << READ << " WRITE = " << WRITE << endl;
 
                 // --- INÍCIO DO CICLO DE EXECUÇÃO ---
 
@@ -284,7 +294,7 @@ void executar_microinstrucoes(vector<array<int, 23>>& micro_instrucoes,
                 }
 
                 Saida << "Registradores no Fim:" << endl;
-                Saida << "H=" << H << " OPC=" << OPC << " TOS=" << TOS << " CPP=" << CPP << " LV=" << LV << " SP=" << SP << " PC=" << PC_registrador << " MDR=" << MDR << " MAR=" << MAR << " MBR=" << (int)MBR << endl
+                Saida << "H = " << H << " OPC = " << OPC << " TOS = " << TOS << " CPP = " << CPP << " LV = " << LV << " SP = " << SP << " PC = " << PC_registrador << " MDR = " << MDR << " MAR = " << MAR << " MBR = " << (int)MBR << endl
                       << endl;
 
                 Saida << "Memória de Dados:" << endl;
@@ -309,20 +319,20 @@ int main() {
                 cerr << "ERRO: Não foi possível ler o arquivo de dados da memória: " << caminho_dados << endl;
                 return 1; // Encerra o programa se a memória não puder ser carregada
         }
-        
+
         fstream Registradores("registrador_inicial.txt");
         int32_t H = 0, OPC = 0, TOS = 0, CPP = 0, LV = 0, SP = 0, MDR = 0, MAR = 0;
         uint8_t MBR = 0;
         int32_t PC_registrador = 0;
-        
+
         carregarRegistradores(Registradores, MAR, MDR, PC_registrador, MBR, SP, LV, CPP, TOS, OPC, H);
-        
+
         ifstream MaquinaVirtual(caminho_instrucoes_alto_nivel);
         if (!MaquinaVirtual) {
                 cerr << "ERRO: Não foi possível ler o arquivo de instruções " << caminho_instrucoes_alto_nivel << endl;
                 return 1;
         }
-        
+
         ofstream Saida(caminho_saida);
         string linha_instrucao;
         int ciclo_global = 1;
@@ -332,10 +342,10 @@ int main() {
         const auto H_EQ_H_MAIS_1 = string_para_microinstrucao("00111001100000000000000");
         const auto MAR_EQ_H_RD = string_para_microinstrucao("00111000000000001010000");
         const auto MAR_SP_EQ_SP_MAIS_1_WR = string_para_microinstrucao("00110101000001001100100");
-        const auto TOS_EQ_MDR = string_para_microinstrucao("00010100001000000000000");
+        const auto TOS_EQ_MDR = string_para_microinstrucao("00110100001000000000000");
         const auto MAR_SP_EQ_SP_MAIS_1 = string_para_microinstrucao("00110101000001001000100");
         const auto MDR_EQ_TOS_WR = string_para_microinstrucao("00010100000000010100111");
-        const auto MDR_EQ_TOS_EQ_H_WR = string_para_microinstrucao("00111000001000010100000");
+        const auto MDR_TOS_EQ_H_WR = string_para_microinstrucao("00111000001000010100000");
 
         while (getline(MaquinaVirtual, linha_instrucao)) {
                 stringstream ss(linha_instrucao);
@@ -366,16 +376,17 @@ int main() {
                         micro_instrucoes_para_executar.push_back(MDR_EQ_TOS_WR);
 
                 } else if (comando == "BIPUSH") {
-                        string byte_str;
-                        ss >> byte_str;
+                        int byte_val;
+                        ss >> byte_val;
                         // Traduzir BIPUSH byte
                         micro_instrucoes_para_executar.push_back(MAR_SP_EQ_SP_MAIS_1);
 
+                        string byte_str = decimal_para_binario8(byte_val);
                         // Microinstrução especial de FETCH
                         string fetch_micro_str = byte_str + "000000000110000"; // byte + 9 bits C + READ/WRITE + 4 bits B
                         micro_instrucoes_para_executar.push_back(string_para_microinstrucao(fetch_micro_str));
 
-                        micro_instrucoes_para_executar.push_back(MDR_EQ_TOS_EQ_H_WR);
+                        micro_instrucoes_para_executar.push_back(MDR_TOS_EQ_H_WR);
                 }
 
                 // 3. EXECUÇÃO DA SEQUÊNCIA GERADA
